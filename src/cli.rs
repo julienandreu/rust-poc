@@ -6,8 +6,8 @@ pub struct Cli {
 }
 
 pub fn parse_args(
-    commands: Vec<(String, String, String, String, &dyn Fn() -> ())>,
-) -> (String, String, String, String, &dyn Fn() -> ()) {
+    commands: Vec<(String, String, String, Vec<String>, &dyn Fn() -> ())>,
+) -> (String, String, String, Vec<String>, &dyn Fn() -> ()) {
     let default_command = commands.first().unwrap().clone();
 
     let args = env::args().collect::<Vec<String>>();
