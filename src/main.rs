@@ -1,4 +1,5 @@
 use colored::*;
+use std::net::TcpListener;
 
 fn show_single_usage(program: String, long: String) {
     println!("\n  $ {} --{}", program.blue(), long);
@@ -33,12 +34,14 @@ fn show_single_option((short, long, description, default): (String, String, Stri
     }
 }
 
+type Handler = dyn Fn(Vec<String>);
+
 fn show_help(
     program: String,
     description: String,
     commands: Vec<(String, String, String, Vec<String>)>,
-) -> impl Fn() {
-    move || {
+) -> Box<Handler> {
+    Box::new(move |_| {
         println!("\n{} - {}", program.bright_blue(), description);
         println!("\nUSAGE");
         commands.iter().for_each(|(_short, long, ..)| {
@@ -49,13 +52,31 @@ fn show_help(
             show_single_option(command.clone());
         });
         println!("");
-    }
+
+        std::process::exit(0);
+    })
 }
 
-fn show_version(version: String) -> impl Fn() {
-    move || {
+fn show_version(version: String) -> Box<Handler> {
+    Box::new(move |_| {
         println!("{}", version);
-    }
+
+        std::process::exit(0);
+    })
+}
+
+fn start_server() -> Box<Handler> {
+    Box::new(|args| {
+        let addr = args.first().unwrap();
+        let listener = TcpListener::bind(addr).unwrap();
+        println!("Listening on: {}", addr);
+
+        for stream in listener.incoming() {
+            let _stream = stream.unwrap();
+
+            println!("Connection established!");
+        }
+    })
 }
 
 fn main() {
@@ -90,11 +111,12 @@ fn main() {
 
     let show_current_help = show_help(program, description, commands.clone());
     let show_current_version = show_version(version);
+    let start_listening = start_server();
 
-    let closures: Vec<(String, &dyn Fn())> = vec![
+    let closures: Vec<(String, &Box<Handler>)> = vec![
         (help_identifier.clone(), &show_current_help),
         (version_identifier.clone(), &show_current_version),
-        (listen_identifier.clone(), &show_current_help),
+        (listen_identifier.clone(), &start_listening),
     ];
 
     let available_commands = commands
@@ -111,8 +133,8 @@ fn main() {
         .into_iter()
         .collect();
 
-    let command = poc::cli::parse_args(available_commands);
+    let (command, param) = poc::cli::parse_args(available_commands);
     let handler = command.4;
 
-    handler();
+    handler(param);
 }
