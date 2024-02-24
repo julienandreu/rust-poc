@@ -32,52 +32,52 @@ fn show_version(version: String) -> impl Fn() {
 }
 
 fn main() {
-    let program = "poc".to_string();
-    let description = "Run http server locally".to_string();
-    let version = "0.1.0".to_string();
+    let program = String::from("poc");
+    let description = String::from("Run http server locally");
+    let version = String::from("0.1.0");
+
+    let help_identifier = String::from("h");
+    let version_identifier = String::from("v");
+    let listen_identifier = String::from("l");
 
     let commands: Vec<(String, String, String, String)> = vec![
         (
-            "h".to_string(),
-            "help".to_string(),
-            "Shows this help message".to_string(),
-            "".to_string(),
+            help_identifier.clone(),
+            String::from("help"),
+            String::from("Shows this help message"),
+            String::from(""),
         ),
         (
-            "v".to_string(),
-            "version".to_string(),
-            "Displays the current version of the application".to_string(),
-            "".to_string(),
+            version_identifier.clone(),
+            String::from("version"),
+            String::from("Displays the current version of the application"),
+            String::from(""),
         ),
         (
-            "l".to_string(),
-            "listen".to_string(),
-            "Specify a URI endpoint on which to listen".to_string(),
-            "0.0.0.0:3000".to_string(),
+            listen_identifier.clone(),
+            String::from("listen"),
+            String::from("Specify a URI endpoint on which to listen"),
+            String::from("0.0.0.0:3000"),
         ),
     ];
 
-    let show_current_help = show_help(
-        program.to_string(),
-        description.to_string(),
-        commands.clone(),
-    );
-    let show_current_version = show_version(version.to_string());
+    let show_current_help = show_help(program, description, commands.clone());
+    let show_current_version = show_version(version);
 
     let closures: Vec<(String, &dyn Fn())> = vec![
-        ("h".to_string(), &show_current_help),
-        ("v".to_string(), &show_current_version),
-        ("l".to_string(), &show_current_help),
+        (help_identifier.clone(), &show_current_help),
+        (version_identifier.clone(), &show_current_version),
+        (listen_identifier.clone(), &show_current_help),
     ];
 
     let available_commands = commands
         .iter()
         .map(|(short, long, desc, default)| {
             return (
-                short.clone(),
-                long.clone(),
-                desc.clone(),
-                default.clone(),
+                String::from(short),
+                String::from(long),
+                String::from(desc),
+                String::from(default),
                 closures.iter().find(|(s, ..)| s == short).unwrap().1,
             );
         })

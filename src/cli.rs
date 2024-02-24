@@ -1,6 +1,5 @@
 use std::env;
 
-#[derive(Debug)]
 pub struct Cli {
     pub command: String,
     pub args: Vec<String>,
